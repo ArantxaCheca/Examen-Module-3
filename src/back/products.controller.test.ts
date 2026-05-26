@@ -70,4 +70,33 @@ describe('Given a instantiated Products Controller', () => {
             });
         });
     });
+
+        describe('When method getById is called', () => {
+        describe('And repo return valid data', () => {
+            test('Then it call json with a product', async () => {
+                req.params = { id: '1' };
+                repo.readById = vi.fn().mockResolvedValueOnce(mockProduct);
+
+                await controller.getById(req, res, next);
+
+                expect(repo.readById).toHaveBeenCalledWith('1');
+                expect(res.json).toHaveBeenCalledWith({
+                    results: [mockProduct],
+                    error: '',
+                });
+                expect(next).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('And repo throw an Error', () => {
+            test('Then it call next', async () => {
+                req.params = { id: '1' };
+                repo.readById = vi.fn().mockRejectedValueOnce(new Error('Any message'));
+
+                await controller.getById(req, res, next);
+
+                expect(next).toHaveBeenCalled();
+            });
+        });
+    });
 });
