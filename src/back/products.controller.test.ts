@@ -189,5 +189,38 @@ describe('Given a instantiated Products Controller', () => {
             });
         });
     });
-    
+
+        // deleteProduct
+    describe('When method delete is called', () => {
+        describe('And repo return valid data', () => {
+            test('Then it call json with deleted product', async () => {
+                req.params = { id: '1' };
+
+                repo.delete = vi.fn().mockResolvedValueOnce(mockProduct);
+
+                await controller.delete(req, res, next);
+
+                expect(repo.delete).toHaveBeenCalledWith('1');
+
+                expect(res.json).toHaveBeenCalledWith({
+                    results: [mockProduct],
+                    error: '',
+                });
+
+                expect(next).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('And repo throw an Error', () => {
+            test('Then it call next', async () => {
+                req.params = { id: '1' };
+
+                repo.delete = vi.fn().mockRejectedValueOnce(new Error('Any message'));
+
+                await controller.delete(req, res, next);
+
+                expect(next).toHaveBeenCalled();
+            });
+        });
+    });
 });
