@@ -144,4 +144,50 @@ describe('Given a instantiated Products Controller', () => {
         });
     });
 
+        // updateProduct
+    describe('When method update is called', () => {
+        describe('And repo return valid data', () => {
+            test('Then it call json with updated product', async () => {
+                req.params = { id: '1' };
+
+                req.body = {
+                    name: 'Updated Product',
+                    price: 20,
+                    stock: 10,
+                };
+
+                repo.update = vi.fn().mockResolvedValueOnce(mockProduct);
+
+                await controller.update(req, res, next);
+
+                expect(repo.update).toHaveBeenCalledWith('1', req.body);
+
+                expect(res.json).toHaveBeenCalledWith({
+                    results: [mockProduct],
+                    error: '',
+                });
+
+                expect(next).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('And repo throw an Error', () => {
+            test('Then it call next', async () => {
+                req.params = { id: '1' };
+
+                req.body = {
+                    name: 'Updated Product',
+                    price: 20,
+                    stock: 10,
+                };
+
+                repo.update = vi.fn().mockRejectedValueOnce(new Error('Any message'));
+
+                await controller.update(req, res, next);
+
+                expect(next).toHaveBeenCalled();
+            });
+        });
+    });
+    
 });
