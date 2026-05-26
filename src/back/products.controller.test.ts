@@ -34,6 +34,7 @@ describe('Given a instantiated Products Controller', () => {
         vi.clearAllMocks();
     });
 
+    // instantiation tests
     describe('When we instantiate it', () => {
         test('Then it should be defined', () => {
             expect(controller).toBeDefined();
@@ -44,6 +45,7 @@ describe('Given a instantiated Products Controller', () => {
         });
     });
 
+    // getAllProducts
     describe('When method getAll is called', () => {
         describe('And repo return valid data', () => {
             test('Then it call json with a list of products', async () => {
@@ -71,7 +73,8 @@ describe('Given a instantiated Products Controller', () => {
         });
     });
 
-        describe('When method getById is called', () => {
+    // getProductById
+    describe('When method getById is called', () => {
         describe('And repo return valid data', () => {
             test('Then it call json with a product', async () => {
                 req.params = { id: '1' };
@@ -99,4 +102,46 @@ describe('Given a instantiated Products Controller', () => {
             });
         });
     });
+
+    // createProduct
+    describe('When method create is called', () => {
+        describe('And repo return valid data', () => {
+            test('Then it call status 201 and json with a product', async () => {
+                req.body = {
+                    name: 'Product 1',
+                    price: 10,
+                    stock: 5,
+                };
+
+                repo.create = vi.fn().mockResolvedValueOnce(mockProduct);
+
+                await controller.create(req, res, next);
+
+                expect(repo.create).toHaveBeenCalledWith(req.body);
+                expect(res.status).toHaveBeenCalledWith(201);
+                expect(res.json).toHaveBeenCalledWith({
+                    results: [mockProduct],
+                    error: '',
+                });
+                expect(next).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('And repo throw an Error', () => {
+            test('Then it call next', async () => {
+                req.body = {
+                    name: 'Product 1',
+                    price: 10,
+                    stock: 5,
+                };
+
+                repo.create = vi.fn().mockRejectedValueOnce(new Error('Any message'));
+
+                await controller.create(req, res, next);
+
+                expect(next).toHaveBeenCalled();
+            });
+        });
+    });
+
 });
